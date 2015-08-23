@@ -1,0 +1,48 @@
+apply plugin: 'com.android.application'
+
+android {
+  signingConfigs {
+    sign
+  }
+  compileSdkVersion 23
+  buildToolsVersion "23.0.0"
+
+  defaultConfig {
+    applicationId "biz.mosil.sample.gradle.keystore"
+    minSdkVersion 10
+    targetSdkVersion 23
+    versionCode 1
+    versionName "1.0"
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.sign
+    }
+  }
+}
+
+dependencies {
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+  testCompile 'junit:junit:4.12'
+  compile 'com.android.support:appcompat-v7:23.0.0'
+}
+
+//file(): 取得這個 module 目錄中的檔案
+def ksFile = file('app2_keystore.properties')
+def props = new Properties();
+if (ksFile.canRead()) {
+  props.load(new FileInputStream(ksFile))
+
+  if (props != null) {
+    android.signingConfigs.sign.storeFile file(props['KEYSTORE_FILE'])
+    android.signingConfigs.sign.storePassword props['KEYSTORE_PASSWORD']
+    android.signingConfigs.sign.keyAlias props['KEYSTORE_ALIAS']
+    android.signingConfigs.sign.keyPassword props['KEYSTORE_ALIAS_PASSWORD']
+  } else {
+    println 'some entries in \'app2_keystore.properties\' not found!'
+  }
+} else {
+  println '\'app2_keystore.properties\' not found!'
+}
